@@ -28,6 +28,9 @@ char ** loadFileAA(char *filename, int *size)
 	
 	// TODO
 	// Allocate memory for an array of strings (arr).
+	int CAPACITY = 10;
+	char ** arr = malloc(CAPACITY * sizeof(char *));
+	
 	// Read the file line by line.
     //   Trim newline.
 	//   Expand array if necessary (realloc).
@@ -38,9 +41,31 @@ char ** loadFileAA(char *filename, int *size)
 	
 	// The size should be the number of entries in the array.
 	*size = 0;
-	
+
+	char buffer[1000];
+
+	while(fgets(buffer, 1000, in))
+	{
+		if(*size >= CAPACITY)
+		{
+			CAPACITY = CAPACITY * 2;
+			arr = realloc(arr, CAPACITY * sizeof(char *));
+		}
+
+		char *nl = strchr(buffer, '\n');
+		if (nl) *nl = '\0';
+
+		int len = strlen(buffer);
+        char *str = malloc((len + 1) * sizeof(char));
+
+		strcpy(str, buffer);
+        arr[*size] = str;
+
+		(*size)++;
+	}
+	fclose(in);
 	// Return pointer to the array of strings.
-	return NULL;
+    return arr;;
 }
 
 char (*loadFile2D(char *filename, int *size))[COLS]
@@ -69,9 +94,15 @@ char (*loadFile2D(char *filename, int *size))[COLS]
 
 // Search the array for the target string.
 // Return the found string or NULL if not found.
-char * substringSearchAA(char *target, char **lines, int size)
+char * substringSearchAA(char *target, char ** arr, int size)
 {
-
+	for(int i =0; i < size; i++)
+	{
+		if(strstr(arr[i], target))
+		{
+			return arr[i];
+		}
+	}
 	return NULL;
 }
 
@@ -84,7 +115,11 @@ char * substringSearch2D(char *target, char (*lines)[COLS], int size)
 // Free the memory used by the array
 void freeAA(char ** arr, int size)
 {
-
+	for (int i = 0; i < size; i++)
+	{
+		free(arr[i]);
+	}
+	free(arr);
 }
 
 void free2D(char (*arr)[COLS])
